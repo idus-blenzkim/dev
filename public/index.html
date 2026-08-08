@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PB 트렌드 허브</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 로그인 화면 -->
+  <div id="login-screen" class="login-screen hidden">
+    <div class="login-card">
+      <div class="login-logo">✨</div>
+      <h1>PB 트렌드 허브</h1>
+      <p class="login-sub">유행하는 상품을 모으고, 영감을 나누고, 소재를 찾는 우리 팀 공간</p>
+      <form id="login-form">
+        <input id="login-nickname" type="text" maxlength="20" placeholder="닉네임을 입력하세요" autocomplete="off" />
+        <button type="submit" class="btn btn-primary btn-block">입장하기</button>
+      </form>
+      <p class="login-hint">처음 입력하는 닉네임이면 자동으로 계정이 만들어져요.</p>
+    </div>
+  </div>
+
+  <!-- 메인 앱 -->
+  <div id="app" class="hidden">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">✨ PB 트렌드 허브</div>
+        <nav class="tabs">
+          <button class="tab active" data-tab="feed">트렌드 피드</button>
+          <button class="tab" data-tab="brag">자랑 게시판</button>
+          <button class="tab" data-tab="sites">사이트 디렉토리</button>
+          <button class="tab" data-tab="mine">내 활동</button>
+        </nav>
+        <div class="topbar-right">
+          <button id="btn-new-post" class="btn btn-primary">+ 공유하기</button>
+          <span id="me-nickname" class="me-nickname"></span>
+          <button id="btn-logout" class="btn btn-ghost">로그아웃</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- 피드 / 자랑 / 내 활동 공용 -->
+      <section id="view-feed" class="view">
+        <div class="feed-controls">
+          <div class="filter-row">
+            <div id="category-chips" class="chips"></div>
+          </div>
+          <div class="filter-row filter-row-right">
+            <input id="search-input" type="search" placeholder="상품, 태그, 사이트 검색…" />
+            <select id="sort-select">
+              <option value="latest">최신순</option>
+              <option value="popular">관심 많은 순</option>
+            </select>
+          </div>
+        </div>
+        <div id="post-grid" class="post-grid"></div>
+        <div id="feed-empty" class="empty hidden">
+          <div class="empty-emoji">🔍</div>
+          <p>아직 공유된 상품이 없어요.<br />첫 번째 트렌드를 공유해 보세요!</p>
+        </div>
+      </section>
+
+      <!-- 사이트 디렉토리 -->
+      <section id="view-sites" class="view hidden">
+        <div class="sites-header">
+          <div class="scope-toggle">
+            <button class="scope-btn active" data-scope="all">팀 전체 사이트</button>
+            <button class="scope-btn" data-scope="mine">내가 등록한 사이트</button>
+          </div>
+          <button id="btn-new-site" class="btn btn-primary">+ 사이트 등록</button>
+        </div>
+        <div id="site-grid" class="site-grid"></div>
+        <div id="sites-empty" class="empty hidden">
+          <div class="empty-emoji">🌐</div>
+          <p>등록된 사이트가 없어요.<br />즐겨 보는 트렌드 사이트를 등록해 주세요!</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 새 포스트 모달 -->
+  <div id="post-modal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="post-modal-title">트렌드 공유하기</h2>
+        <button class="modal-close" data-close="post-modal">&times;</button>
+      </div>
+      <form id="post-form">
+        <div class="type-toggle">
+          <label><input type="radio" name="post_type" value="trend" checked /> <span>🔥 트렌드 발견</span></label>
+          <label><input type="radio" name="post_type" value="brag" /> <span>🏆 소재 발굴 자랑</span></label>
+        </div>
+        <label class="field">상품/소재 이름 *
+          <input name="title" required maxlength="100" placeholder="예) 젤리 그립톡 스마트톡" />
+        </label>
+        <div class="field-row">
+          <label class="field">카테고리
+            <select name="category"></select>
+          </label>
+          <label class="field">가격
+            <input name="price" maxlength="30" placeholder="예) 12,000원" />
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field">발견한 사이트
+            <input name="source_site" maxlength="50" placeholder="예) 와디즈" />
+          </label>
+          <label class="field">상품 링크
+            <input name="url" type="url" placeholder="https://…" />
+          </label>
+        </div>
+        <label class="field">이미지 URL
+          <input name="image_url" type="url" placeholder="https://… (선택)" />
+        </label>
+        <label class="field">태그 (쉼표로 구분)
+          <input name="tags" maxlength="200" placeholder="예) 그립톡, 젤리, 투명" />
+        </label>
+        <label class="field">메모 / 인사이트
+          <textarea name="memo" rows="3" maxlength="1000" placeholder="왜 뜨고 있는지, PB로 어떻게 풀 수 있을지 적어 주세요."></textarea>
+        </label>
+        <button type="submit" class="btn btn-primary btn-block">공유하기</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 새 사이트 모달 -->
+  <div id="site-modal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>사이트 등록</h2>
+        <button class="modal-close" data-close="site-modal">&times;</button>
+      </div>
+      <form id="site-form">
+        <label class="field">사이트 이름 *
+          <input name="name" required maxlength="50" placeholder="예) 와디즈" />
+        </label>
+        <label class="field">주소(URL) *
+          <input name="url" required maxlength="300" placeholder="예) www.wadiz.kr" />
+        </label>
+        <label class="field">카테고리
+          <select name="category"></select>
+        </label>
+        <label class="field">이 사이트를 보는 이유
+          <textarea name="description" rows="2" maxlength="300" placeholder="예) 펀딩 랭킹으로 뜨는 아이템 미리 보기"></textarea>
+        </label>
+        <button type="submit" class="btn btn-primary btn-block">등록하기</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

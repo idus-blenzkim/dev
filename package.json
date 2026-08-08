@@ -1,0 +1,16 @@
+{
+  "name": "pb-trend-hub",
+  "version": "1.0.0",
+  "description": "PB팀 트렌드 큐레이션 플랫폼 - 유행 상품 공유, 소재 발굴, 사이트 디렉토리",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
