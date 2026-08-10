@@ -1,6 +1,9 @@
 /* PB 트렌드 허브 프론트엔드 */
 
 const POST_CATEGORIES = ['문구/팬시', '리빙/홈데코', '패션잡화', '뷰티', '푸드', '디지털/테크', '키즈', '반려동물', '기타'];
+const COUNTRIES = ['한국', '일본', '미국', '중국', '동남아', '유럽', '글로벌'];
+const COUNTRY_FLAG = { '한국': '🇰🇷', '일본': '🇯🇵', '미국': '🇺🇸', '중국': '🇨🇳', '동남아': '🌴', '유럽': '🇪🇺', '글로벌': '🌏' };
+const flag = (c) => COUNTRY_FLAG[c] || '🌏';
 const SITE_CATEGORIES = ['펀딩/트렌드', '문구/팬시', '리빙/홈데코', '패션잡화', '뷰티', '푸드', '영감/레퍼런스', '핸드메이드', '해외', '기타'];
 const CATEGORY_EMOJI = {
   '문구/팬시': '✏️', '리빙/홈데코': '🏠', '패션잡화': '👜', '뷰티': '💄', '푸드': '🍑',
@@ -9,8 +12,9 @@ const CATEGORY_EMOJI = {
 
 const state = {
   user: null,
-  tab: 'feed',          // feed | brag | sites | mine
+  tab: 'dashboard',     // dashboard | feed | brag | sites | mine
   category: '전체',
+  country: '전체',
   sort: 'latest',
   q: '',
   siteScope: 'all',
@@ -114,10 +118,104 @@ $$('.tab').forEach((btn) => btn.addEventListener('click', () => {
 
 function render() {
   const isSites = state.tab === 'sites';
-  $('#view-feed').classList.toggle('hidden', isSites);
+  const isDash = state.tab === 'dashboard';
+  $('#view-dashboard').classList.toggle('hidden', !isDash);
+  $('#view-feed').classList.toggle('hidden', isDash || isSites);
   $('#view-sites').classList.toggle('hidden', !isSites);
-  if (isSites) loadSites();
+  if (isDash) loadDashboard();
+  else if (isSites) loadSites();
   else loadPosts();
+}
+
+// ---------- 대시보드 ----------
+
+async function loadDashboard() {
+  const { kpis, dailySites, hotTags, topPosts, byIp, byCountry } = await api('/api/dashboard');
+
+  $('#kpi-row').innerHTML = [
+    { label: '이번 주 새 트렌드', value: kpis.posts_week, emoji: '🆕' },
+    { label: '누적 관심있어요', value: kpis.interests_total, emoji: '❤️' },
+    { label: '참여 팀원', value: kpis.members, emoji: '👥' },
+    { label: '등록된 사이트', value: kpis.sites, emoji: '🌐' },
+  ].map((k) => `
+    <div class="kpi">
+      <div class="kpi-emoji">${k.emoji}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-label">${k.label}</div>
+    </div>`).join('');
+
+  // 데일리 체크
+  const done = dailySites.filter((s) => s.checked).length;
+  $('#daily-progress').textContent = dailySites.length ? `${done}/${dailySites.length} 완료` : '';
+  $('#daily-list').innerHTML = dailySites.length ? dailySites.map((s) => {
+    const link = safeHttpUrl(s.url);
+    return `
+    <div class="daily-item ${s.checked ? 'done' : ''}" data-id="${s.id}">
+      <button class="daily-check" data-act="daily-toggle">${s.checked ? '✅' : '⬜'}</button>
+      <div class="daily-info">
+        <span class="daily-name">${flag(s.country)} ${link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(s.name)} ↗</a>` : esc(s.name)}</span>
+        ${s.description ? `<span class="daily-desc">${esc(s.description)}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('') : '<p class="dash-empty">사이트 등록 시 "매일 봐야 하는 사이트"로 체크하면 여기에 표시돼요.</p>';
+
+  $$('#daily-list [data-act="daily-toggle"]').forEach((btn) => btn.addEventListener('click', async () => {
+    const id = btn.closest('.daily-item').dataset.id;
+    try {
+      await api(`/api/sites/${id}/check`, { method: 'POST' });
+      loadDashboard();
+    } catch (err) { toast(err.message); }
+  }));
+
+  // 인기 태그
+  $('#hot-tags').innerHTML = hotTags.length
+    ? hotTags.map((t) => `<button class="hot-tag" data-tag="${esc(t.tag)}">#${esc(t.tag)} <b>${t.count}</b></button>`).join('')
+    : '<p class="dash-empty">최근 2주간 태그가 없어요.</p>';
+  $$('#hot-tags .hot-tag').forEach((btn) => btn.addEventListener('click', () => {
+    state.q = btn.dataset.tag;
+    switchTab('feed');
+    $('#search-input').value = state.q;
+  }));
+
+  // 관심 급상승
+  $('#top-posts').innerHTML = topPosts.filter((p) => p.interest_count > 0).map((p, i) => `
+    <div class="top-post">
+      <span class="top-rank">${i + 1}</span>
+      <span class="top-title">${flag(p.country)} ${esc(p.title)}${p.ip_name ? ` <span class="tag">${esc(p.ip_name)}</span>` : ''}</span>
+      <span class="top-count">❤️ ${p.interest_count}</span>
+    </div>`).join('') || '<p class="dash-empty">아직 관심 표시가 없어요.</p>';
+
+  // IP별 인기 상품
+  $('#ip-board').innerHTML = byIp.length ? byIp.map((ip) => `
+    <div class="ip-card">
+      <div class="ip-head">
+        <span class="ip-name">${esc(ip.ip_name)}</span>
+        <span class="ip-stat">포스트 ${ip.post_count} · ❤️ ${ip.interest_sum}</span>
+      </div>
+      ${ip.top_posts.map((p) => `
+        <div class="ip-post">
+          <span>${flag(p.country)} ${esc(p.title)}</span>
+          <span class="ip-post-meta">${p.price ? esc(p.price) + ' · ' : ''}❤️ ${p.interest_count}</span>
+        </div>`).join('')}
+    </div>`).join('')
+    : '<p class="dash-empty">아직 IP가 입력된 포스트가 없어요. 공유할 때 IP(캐릭터/브랜드)를 입력해 보세요.</p>';
+
+  // 국가별 트렌드
+  $('#country-board').innerHTML = byCountry.map((c) => `
+    <div class="country-col">
+      <div class="country-head">${flag(c.country)} ${esc(c.country)} <span class="dash-sub">${c.post_count}건</span></div>
+      ${c.recent_posts.map((p) => `
+        <div class="country-post">
+          <span>${esc(p.title)}${p.ip_name ? ` <span class="tag">${esc(p.ip_name)}</span>` : ''}</span>
+          <span class="ip-post-meta">❤️ ${p.interest_count}</span>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function switchTab(tab) {
+  state.tab = tab;
+  $$('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
+  render();
 }
 
 // ---------- 카테고리 칩 ----------
@@ -140,6 +238,7 @@ async function loadPosts() {
   const params = new URLSearchParams();
   if (state.sort) params.set('sort', state.sort);
   if (state.category !== '전체') params.set('category', state.category);
+  if (state.country !== '전체') params.set('country', state.country);
   if (state.q) params.set('q', state.q);
   if (state.tab === 'brag') params.set('type', 'brag');
   if (state.tab === 'mine') params.set('author', 'me');
@@ -176,10 +275,11 @@ function postCard(p) {
     <div style="position:relative">${thumb}<span class="badge-type" style="position:absolute;top:10px;left:10px">${typeBadge}</span></div>
     <div class="post-body">
       <div class="post-meta-top">
-        <span class="post-cat">${esc(p.category)}</span>
+        <span class="post-cat">${flag(p.country)} ${esc(p.category)}</span>
         <span>${esc(p.author)} · ${timeAgo(p.created_at)}</span>
       </div>
       <h3 class="post-title">${titleHtml}</h3>
+      ${p.ip_name ? `<div><span class="tag ip-tag">🎨 ${esc(p.ip_name)}</span></div>` : ''}
       ${p.price ? `<div class="post-price">${esc(p.price)}</div>` : ''}
       ${p.memo ? `<p class="post-memo">${esc(p.memo)}</p>` : ''}
       ${p.tags.length ? `<div class="post-tags">${p.tags.map((t) => `<span class="tag">#${esc(t)}</span>`).join('')}</div>` : ''}
@@ -263,7 +363,11 @@ async function toggleComments(postId, open) {
   });
 }
 
-// 검색 / 정렬
+// 검색 / 정렬 / 국가
+$('#country-filter').addEventListener('change', (e) => {
+  state.country = e.target.value;
+  loadPosts();
+});
 let searchTimer;
 $('#search-input').addEventListener('input', (e) => {
   clearTimeout(searchTimer);
@@ -293,9 +397,10 @@ async function loadSites() {
     return `
     <div class="site-card" data-id="${s.id}">
       <div class="site-top">
-        <span class="site-name">${link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(s.name)} ↗</a>` : esc(s.name)}</span>
+        <span class="site-name">${flag(s.country)} ${link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(s.name)} ↗</a>` : esc(s.name)}</span>
         <span class="site-cat">${esc(s.category)}</span>
       </div>
+      ${s.daily_check ? '<div class="site-daily">📌 매일 체크</div>' : ''}
       <div class="site-url">${esc(s.url)}</div>
       ${s.description ? `<div class="site-desc">${esc(s.description)}</div>` : ''}
       <div class="site-foot">
@@ -328,6 +433,18 @@ function fillCategorySelects() {
     POST_CATEGORIES.map((c) => `<option>${esc(c)}</option>`).join('');
   $('#site-form select[name="category"]').innerHTML =
     SITE_CATEGORIES.map((c) => `<option>${esc(c)}</option>`).join('');
+  const countryOpts = COUNTRIES.map((c) => `<option>${flag(c)} ${esc(c)}</option>`).join('');
+  $('#post-form select[name="country"]').innerHTML = countryOpts;
+  $('#site-form select[name="country"]').innerHTML = countryOpts;
+  $('#country-filter').innerHTML =
+    `<option value="전체">🌐 국가 전체</option>` +
+    COUNTRIES.map((c) => `<option value="${esc(c)}">${flag(c)} ${esc(c)}</option>`).join('');
+}
+
+// select에 넣은 "🇰🇷 한국" 형태에서 국가명만 추출
+function parseCountry(v) {
+  const parts = String(v || '').trim().split(' ');
+  return parts[parts.length - 1] || '한국';
 }
 
 $('#btn-new-post').addEventListener('click', () => $('#post-modal').classList.remove('hidden'));
@@ -343,14 +460,13 @@ $('#post-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
   const body = Object.fromEntries(fd.entries());
+  body.country = parseCountry(body.country);
   try {
     await api('/api/posts', { method: 'POST', body });
     $('#post-modal').classList.add('hidden');
     e.target.reset();
     toast('공유했습니다! 🎉');
-    state.tab = body.post_type === 'brag' ? 'brag' : 'feed';
-    $$('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === state.tab));
-    render();
+    switchTab(body.post_type === 'brag' ? 'brag' : 'feed');
   } catch (err) {
     toast(err.message);
   }
@@ -360,6 +476,8 @@ $('#site-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
   const body = Object.fromEntries(fd.entries());
+  body.country = parseCountry(body.country);
+  body.daily_check = fd.get('daily_check') ? 1 : 0;
   try {
     await api('/api/sites', { method: 'POST', body });
     $('#site-modal').classList.add('hidden');

@@ -28,7 +28,8 @@
       <div class="topbar-inner">
         <div class="brand">✨ PB 트렌드 허브</div>
         <nav class="tabs">
-          <button class="tab active" data-tab="feed">트렌드 피드</button>
+          <button class="tab active" data-tab="dashboard">대시보드</button>
+          <button class="tab" data-tab="feed">트렌드 피드</button>
           <button class="tab" data-tab="brag">자랑 게시판</button>
           <button class="tab" data-tab="sites">사이트 디렉토리</button>
           <button class="tab" data-tab="mine">내 활동</button>
@@ -42,14 +43,46 @@
     </header>
 
     <main class="container">
+      <!-- 대시보드 -->
+      <section id="view-dashboard" class="view">
+        <div id="kpi-row" class="kpi-row"></div>
+
+        <div class="dash-grid">
+          <div class="dash-card">
+            <h2 class="dash-title">✅ 오늘의 데일리 체크 <span id="daily-progress" class="dash-sub"></span></h2>
+            <p class="dash-desc">매일 놓치지 않고 봐야 하는 사이트예요. 확인했으면 체크!</p>
+            <div id="daily-list" class="daily-list"></div>
+          </div>
+
+          <div class="dash-card">
+            <h2 class="dash-title">🔥 지금 뜨는 태그 <span class="dash-sub">최근 2주</span></h2>
+            <div id="hot-tags" class="hot-tags"></div>
+            <h2 class="dash-title" style="margin-top:20px">🚀 관심 급상승</h2>
+            <div id="top-posts" class="top-posts"></div>
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <h2 class="dash-title">🎨 IP별 인기 상품</h2>
+          <p class="dash-desc">캐릭터/브랜드 IP가 입력된 포스트를 관심 수 기준으로 모아 봅니다.</p>
+          <div id="ip-board" class="ip-board"></div>
+        </div>
+
+        <div class="dash-card">
+          <h2 class="dash-title">🌏 국가별 트렌드</h2>
+          <div id="country-board" class="country-board"></div>
+        </div>
+      </section>
+
       <!-- 피드 / 자랑 / 내 활동 공용 -->
-      <section id="view-feed" class="view">
+      <section id="view-feed" class="view hidden">
         <div class="feed-controls">
           <div class="filter-row">
             <div id="category-chips" class="chips"></div>
           </div>
           <div class="filter-row filter-row-right">
-            <input id="search-input" type="search" placeholder="상품, 태그, 사이트 검색…" />
+            <select id="country-filter"></select>
+            <input id="search-input" type="search" placeholder="상품, 태그, IP, 사이트 검색…" />
             <select id="sort-select">
               <option value="latest">최신순</option>
               <option value="popular">관심 많은 순</option>
@@ -105,6 +138,14 @@
           </label>
         </div>
         <div class="field-row">
+          <label class="field">국가/지역
+            <select name="country"></select>
+          </label>
+          <label class="field">IP (캐릭터/브랜드)
+            <input name="ip_name" maxlength="50" placeholder="예) 산리오, 치이카와 (선택)" />
+          </label>
+        </div>
+        <div class="field-row">
           <label class="field">발견한 사이트
             <input name="source_site" maxlength="50" placeholder="예) 와디즈" />
           </label>
@@ -140,11 +181,20 @@
         <label class="field">주소(URL) *
           <input name="url" required maxlength="300" placeholder="예) www.wadiz.kr" />
         </label>
-        <label class="field">카테고리
-          <select name="category"></select>
-        </label>
+        <div class="field-row">
+          <label class="field">카테고리
+            <select name="category"></select>
+          </label>
+          <label class="field">국가/지역
+            <select name="country"></select>
+          </label>
+        </div>
         <label class="field">이 사이트를 보는 이유
           <textarea name="description" rows="2" maxlength="300" placeholder="예) 펀딩 랭킹으로 뜨는 아이템 미리 보기"></textarea>
+        </label>
+        <label class="check-field">
+          <input type="checkbox" name="daily_check" value="1" />
+          <span>📌 매일 봐야 하는 사이트 (대시보드 데일리 체크에 표시)</span>
         </label>
         <button type="submit" class="btn btn-primary btn-block">등록하기</button>
       </form>

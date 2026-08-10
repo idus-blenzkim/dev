@@ -33,6 +33,8 @@ db.exec(`
     price       TEXT,
     source_site TEXT,
     category    TEXT NOT NULL DEFAULT '기타',
+    country     TEXT NOT NULL DEFAULT '한국',
+    ip_name     TEXT NOT NULL DEFAULT '',
     tags        TEXT NOT NULL DEFAULT '',
     memo        TEXT NOT NULL DEFAULT '',
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
@@ -60,7 +62,16 @@ db.exec(`
     url         TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     category    TEXT NOT NULL DEFAULT '기타',
+    country     TEXT NOT NULL DEFAULT '한국',
+    daily_check INTEGER NOT NULL DEFAULT 0,
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS site_checks (
+    site_id    INTEGER NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    check_date TEXT NOT NULL,
+    PRIMARY KEY (site_id, user_id, check_date)
   );
 
   CREATE INDEX IF NOT EXISTS idx_posts_created ON posts(created_at DESC);
@@ -68,6 +79,16 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_id);
   CREATE INDEX IF NOT EXISTS idx_sites_user ON sites(user_id);
 `);
+
+// 기존 DB에 새 컬럼이 없으면 추가 (경량 마이그레이션)
+function ensureColumn(table, column, ddl) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all().map((c) => c.name);
+  if (!cols.includes(column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+}
+ensureColumn('posts', 'country', "country TEXT NOT NULL DEFAULT '한국'");
+ensureColumn('posts', 'ip_name', "ip_name TEXT NOT NULL DEFAULT ''");
+ensureColumn('sites', 'country', "country TEXT NOT NULL DEFAULT '한국'");
+ensureColumn('sites', 'daily_check', 'daily_check INTEGER NOT NULL DEFAULT 0');
 
 function seed() {
   const count = db.prepare('SELECT COUNT(*) AS n FROM posts').get().n;
@@ -77,31 +98,37 @@ function seed() {
   const botId = insertUser.run('트렌드봇').lastInsertRowid;
 
   const insertPost = db.prepare(`
-    INSERT INTO posts (user_id, post_type, title, url, image_url, price, source_site, category, tags, memo)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO posts (user_id, post_type, title, url, image_url, price, source_site, category, country, ip_name, tags, memo)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const samples = [
     ['trend', '젤리 그립톡 스마트톡', 'https://www.29cm.co.kr', '', '8,900원', '29CM',
-      '디지털/테크', '그립톡,젤리,투명', 'SNS에서 투명 젤리 소재 그립톡이 계속 올라옴. 컬러 베리에이션으로 PB 전개 가능해 보여요.'],
+      '디지털/테크', '한국', '', '그립톡,젤리,투명', 'SNS에서 투명 젤리 소재 그립톡이 계속 올라옴. 컬러 베리에이션으로 PB 전개 가능해 보여요.'],
     ['trend', '납작 복숭아 모양 인센스 홀더', 'https://ohou.se', '', '15,000원', '오늘의집',
-      '리빙/홈데코', '인센스,홈프레그런스,오브제', '홈프레그런스 카테고리가 꾸준히 성장 중. 과일 모티브 오브제형 홀더가 인기.'],
+      '리빙/홈데코', '한국', '', '인센스,홈프레그런스,오브제', '홈프레그런스 카테고리가 꾸준히 성장 중. 과일 모티브 오브제형 홀더가 인기.'],
+    ['trend', '치이카와 미니 파우치 가챠', 'https://www.makuake.com', '', '¥550', '마쿠아케',
+      '패션잡화', '일본', '치이카와', '치이카와,가챠,파우치', '일본 가챠샵에서 품절 행진. 국내 수요도 SNS에서 확인됨.'],
+    ['trend', '산리오 마이멜로디 데스크 클리너', 'https://www.rakuten.co.jp', '', '¥1,320', '라쿠텐',
+      '문구/팬시', '일본', '산리오', '산리오,마이멜로디,데스크테리어', '라쿠텐 문구 랭킹 상위권. 캐릭터 데스크테리어 수요 꾸준함.'],
     ['trend', '모루 인형 키링 DIY 키트', 'https://www.idus.com', '', '12,000원', '아이디어스',
-      '문구/팬시', '모루인형,키링,DIY', '모루 인형 열풍이 키트 상품으로 확장되는 중. 초보자용 키트 구성 참고.'],
+      '문구/팬시', '한국', '', '모루인형,키링,DIY', '모루 인형 열풍이 키트 상품으로 확장되는 중. 초보자용 키트 구성 참고.'],
     ['brag', '빈티지 체크 패턴 데스크 매트 소재 발굴!', 'https://www.wadiz.kr', '', '', '와디즈',
-      '문구/팬시', '데스크테리어,체크,빈티지', '펀딩 오픈 3일 만에 1,000% 달성한 데스크 매트. 이 체크 패턴 원단 공급처 찾았습니다 👍'],
+      '문구/팬시', '한국', '', '데스크테리어,체크,빈티지', '펀딩 오픈 3일 만에 1,000% 달성한 데스크 매트. 이 체크 패턴 원단 공급처 찾았습니다 👍'],
   ];
   for (const s of samples) insertPost.run(botId, ...s);
 
   const insertSite = db.prepare(
-    'INSERT INTO sites (user_id, name, url, description, category) VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO sites (user_id, name, url, description, category, country, daily_check) VALUES (?, ?, ?, ?, ?, ?, ?)'
   );
   const sites = [
-    ['와디즈', 'https://www.wadiz.kr', '펀딩 랭킹으로 뜨는 아이템 미리 보기', '펀딩/트렌드'],
-    ['29CM', 'https://www.29cm.co.kr', '기획전/브랜드 큐레이션 레퍼런스', '영감/레퍼런스'],
-    ['오늘의집', 'https://ohou.se', '리빙 카테고리 인기 상품, 유저 취향 파악', '리빙/홈데코'],
-    ['핀터레스트', 'https://www.pinterest.com', '무드보드, 디자인 레퍼런스 수집', '영감/레퍼런스'],
-    ['아이디어스', 'https://www.idus.com', '핸드메이드 트렌드, 실시간 인기 작품', '핸드메이드'],
+    ['와디즈', 'https://www.wadiz.kr', '펀딩 랭킹으로 뜨는 아이템 미리 보기', '펀딩/트렌드', '한국', 1],
+    ['마쿠아케', 'https://www.makuake.com', '일본 펀딩 랭킹 - 신상 트렌드 선행지표', '펀딩/트렌드', '일본', 1],
+    ['라쿠텐 랭킹', 'https://ranking.rakuten.co.jp', '일본 커머스 실시간 랭킹', '펀딩/트렌드', '일본', 1],
+    ['오늘의집', 'https://ohou.se', '리빙 카테고리 인기 상품, 유저 취향 파악', '리빙/홈데코', '한국', 1],
+    ['핀터레스트', 'https://www.pinterest.com', '무드보드, 디자인 레퍼런스 수집', '영감/레퍼런스', '글로벌', 0],
+    ['아이디어스', 'https://www.idus.com', '핸드메이드 트렌드, 실시간 인기 작품', '핸드메이드', '한국', 0],
+    ['29CM', 'https://www.29cm.co.kr', '기획전/브랜드 큐레이션 레퍼런스', '영감/레퍼런스', '한국', 0],
   ];
   for (const s of sites) insertSite.run(botId, ...s);
 }
