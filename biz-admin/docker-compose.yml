@@ -1,0 +1,12 @@
+services:
+  biz-admin:
+    build: .
+    container_name: biz-admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - biz-admin-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  biz-admin-data:

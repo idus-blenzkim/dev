@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>PB 트렌드 허브 (데모)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+:root {
+  --bg: #faf8f5;
+  --bg-subtle: #fdfcfa;
+  --surface: #ffffff;
+  --ink: #2b2622;
+  --ink-soft: #6f675f;
+  --ink-faint: #a39a90;
+  --line: #eae4dc;
+  --accent: #e8590c;
+  --accent-soft: #fff0e6;
+  --brag: #7048e8;
+  --brag-soft: #f1ecff;
+  --heart: #e0245e;
+  --heart-soft: #fdeef3;
+  --ok-soft: #f2fbf4;
+  --ok-line: #cdeed4;
+  --grad-a: #fff7ef;
+  --grad-b: #f3ecff;
+  --thumb-a: #ffe8d9;
+  --thumb-b: #ffd8be;
+  --thumb-brag-a: #ece4ff;
+  --thumb-brag-b: #dcd0ff;
+  --topbar-bg: rgba(255, 255, 255, 0.92);
+  --radius: 14px;
+  --shadow: 0 1px 3px rgba(43, 38, 34, 0.06), 0 6px 20px rgba(43, 38, 34, 0.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151210;
+    --bg-subtle: #1a1613;
+    --surface: #1e1a16;
+    --ink: #ede6de;
+    --ink-soft: #b0a698;
+    --ink-faint: #7d746a;
+    --line: #332d26;
+    --accent: #ff8a3d;
+    --accent-soft: #3a2416;
+    --brag: #a78bfa;
+    --brag-soft: #2b2440;
+    --heart: #ff5c8a;
+    --heart-soft: #3a202b;
+    --ok-soft: #16281b;
+    --ok-line: #2b4a33;
+    --grad-a: #241b12;
+    --grad-b: #1d1626;
+    --thumb-a: #3a2a1c;
+    --thumb-b: #332214;
+    --thumb-brag-a: #2e2749;
+    --thumb-brag-b: #252040;
+    --topbar-bg: rgba(24, 20, 17, 0.92);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151210;
+  --bg-subtle: #1a1613;
+  --surface: #1e1a16;
+  --ink: #ede6de;
+  --ink-soft: #b0a698;
+  --ink-faint: #7d746a;
+  --line: #332d26;
+  --accent: #ff8a3d;
+  --accent-soft: #3a2416;
+  --brag: #a78bfa;
+  --brag-soft: #2b2440;
+  --heart: #ff5c8a;
+  --heart-soft: #3a202b;
+  --ok-soft: #16281b;
+  --ok-line: #2b4a33;
+  --grad-a: #241b12;
+  --grad-b: #1d1626;
+  --thumb-a: #3a2a1c;
+  --thumb-b: #332214;
+  --thumb-brag-a: #2e2749;
+  --thumb-brag-b: #252040;
+  --topbar-bg: rgba(24, 20, 17, 0.92);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+}
+.hidden { display: none !important; }
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; font-size: 14px; color: var(--ink); }
+
+.demo-banner {
+  background: var(--brag-soft);
+  color: var(--brag);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-align: center;
+  padding: 7px 12px;
+}
+.demo-banner button {
+  border: none; background: transparent; color: inherit;
+  font-size: 12px; font-weight: 700; text-decoration: underline; margin-left: 8px;
+}
+
+/* 로그인 */
+.login-screen {
+  min-height: 88vh;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, var(--grad-a) 0%, var(--bg) 55%, var(--grad-b) 100%);
+  padding: 20px;
+}
+.login-card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
+  box-shadow: var(--shadow); padding: 44px 40px; width: 100%; max-width: 400px; text-align: center;
+}
+.login-logo { font-size: 40px; margin-bottom: 8px; }
+.login-card h1 { font-size: 24px; margin-bottom: 8px; }
+.login-sub { color: var(--ink-soft); font-size: 14px; margin-bottom: 28px; }
+.login-card input {
+  width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px;
+  margin-bottom: 12px; font-size: 15px; background: var(--surface);
+}
+.login-card input:focus { outline: none; border-color: var(--accent); }
+.login-hint { margin-top: 16px; font-size: 12px; color: var(--ink-faint); }
+
+/* 버튼 */
+.btn { border: none; border-radius: 10px; padding: 9px 16px; font-size: 14px; font-weight: 600; transition: filter 0.15s, background 0.15s; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-ghost { background: transparent; color: var(--ink-soft); }
+.btn-ghost:hover { background: var(--line); }
+.btn-block { width: 100%; padding: 12px; font-size: 15px; }
+
+/* 상단바 */
+.topbar { position: sticky; top: 0; z-index: 20; background: var(--topbar-bg); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.topbar-inner { max-width: 1180px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.brand { font-weight: 800; font-size: 17px; white-space: nowrap; }
+.tabs { display: flex; gap: 4px; flex: 1; }
+.tab { background: transparent; border: none; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--ink-soft); }
+.tab:hover { background: var(--line); }
+.tab.active { background: var(--ink); color: var(--bg); }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.me-nickname { font-size: 13px; font-weight: 700; color: var(--ink-soft); }
+
+.container { max-width: 1180px; margin: 0 auto; padding: 24px 20px 80px; }
+
+/* 피드 컨트롤 */
+.feed-controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.filter-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.filter-row-right { justify-content: flex-end; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 13px; font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+#search-input { padding: 9px 14px; border: 1.5px solid var(--line); border-radius: 10px; width: 220px; background: var(--surface); }
+#search-input:focus { outline: none; border-color: var(--accent); }
+#sort-select, #country-filter { padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); font-weight: 600; }
+
+/* 포스트 카드 */
+.post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px; }
+.post-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.15s; }
+.post-card:hover { transform: translateY(-2px); }
+.post-thumb { height: 150px; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+.post-thumb.placeholder { background: linear-gradient(135deg, var(--thumb-a), var(--thumb-b)); }
+.post-card.brag .post-thumb.placeholder { background: linear-gradient(135deg, var(--thumb-brag-a), var(--thumb-brag-b)); }
+.badge-type { position: absolute; top: 10px; left: 10px; font-size: 11px; font-weight: 800; padding: 4px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.post-card.brag .badge-type { background: var(--brag-soft); color: var(--brag); }
+.post-body { padding: 14px 16px 12px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.post-meta-top { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--ink-faint); }
+.post-cat { font-weight: 700; color: var(--ink-soft); }
+.post-title { font-size: 15px; font-weight: 700; line-height: 1.4; }
+.post-title a { color: inherit; text-decoration: none; }
+.post-title a:hover { color: var(--accent); }
+.post-price { font-size: 14px; font-weight: 800; color: var(--accent); }
+.post-memo { font-size: 13px; color: var(--ink-soft); white-space: pre-wrap; }
+.post-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag { font-size: 11.5px; color: var(--brag); background: var(--brag-soft); border-radius: 6px; padding: 2px 7px; font-weight: 600; }
+.post-source { font-size: 12px; color: var(--ink-faint); }
+.post-foot { border-top: 1px solid var(--line); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.btn-interest { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 13px; font-size: 13px; font-weight: 700; color: var(--ink-soft); }
+.btn-interest:hover { border-color: var(--heart); color: var(--heart); }
+.btn-interest.on { background: var(--heart-soft); border-color: var(--heart); color: var(--heart); }
+.interest-names { font-size: 11px; color: var(--ink-faint); text-align: right; flex: 1; }
+.btn-comments { border: none; background: transparent; font-size: 13px; color: var(--ink-faint); font-weight: 600; }
+.btn-delete { border: none; background: transparent; color: var(--ink-faint); font-size: 12px; }
+.btn-delete:hover { color: var(--heart); }
+.comments-box { border-top: 1px dashed var(--line); padding: 10px 16px 14px; background: var(--bg-subtle); }
+.comment { font-size: 13px; margin-bottom: 6px; }
+.comment b { margin-right: 6px; }
+.comment-time { font-size: 11px; color: var(--ink-faint); margin-left: 6px; }
+.comment-form { display: flex; gap: 6px; margin-top: 8px; }
+.comment-form input { flex: 1; padding: 7px 11px; border: 1.5px solid var(--line); border-radius: 8px; background: var(--surface); }
+.comment-form button { padding: 7px 12px; font-size: 13px; }
+
+/* 사이트 */
+.sites-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.scope-toggle { display: flex; background: var(--line); border-radius: 999px; padding: 3px; }
+.scope-btn { border: none; background: transparent; padding: 7px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 700; color: var(--ink-soft); }
+.scope-btn.active { background: var(--surface); color: var(--ink); }
+.site-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.site-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.site-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.site-name { font-size: 15px; font-weight: 800; }
+.site-name a { color: inherit; text-decoration: none; }
+.site-name a:hover { color: var(--accent); }
+.site-cat { font-size: 11px; font-weight: 700; color: var(--brag); background: var(--brag-soft); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.site-url { font-size: 12px; color: var(--ink-faint); word-break: break-all; }
+.site-desc { font-size: 13px; color: var(--ink-soft); }
+.site-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 12px; color: var(--ink-faint); }
+.site-daily { font-size: 11.5px; font-weight: 700; color: var(--accent); }
+
+/* 모달 */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(15, 12, 10, 0.5); display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px; z-index: 50; overflow-y: auto; }
+.modal { background: var(--surface); border-radius: 18px; width: 100%; max-width: 520px; padding: 24px 26px 26px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.modal-head h2 { font-size: 18px; }
+.modal-close { border: none; background: transparent; font-size: 26px; color: var(--ink-faint); line-height: 1; }
+.type-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
+.type-toggle label { flex: 1; border: 1.5px solid var(--line); border-radius: 10px; padding: 10px; text-align: center; font-size: 14px; font-weight: 700; cursor: pointer; color: var(--ink-soft); }
+.type-toggle input { display: none; }
+.type-toggle label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.field { display: block; font-size: 13px; font-weight: 700; color: var(--ink-soft); margin-bottom: 12px; }
+.field input, .field select, .field textarea { display: block; width: 100%; margin-top: 5px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; font-weight: 400; background: var(--surface); resize: vertical; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.check-field { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; color: var(--ink-soft); margin-bottom: 14px; cursor: pointer; }
+
+/* 대시보드 */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 18px; text-align: center; }
+.kpi-emoji { font-size: 22px; }
+.kpi-value { font-size: 26px; font-weight: 800; margin: 2px 0; font-variant-numeric: tabular-nums; }
+.kpi-label { font-size: 12.5px; color: var(--ink-soft); font-weight: 600; }
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+.dash-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 22px; margin-bottom: 18px; }
+.dash-grid .dash-card { margin-bottom: 0; }
+.dash-title { font-size: 16px; font-weight: 800; display: flex; align-items: baseline; gap: 8px; }
+.dash-sub { font-size: 12px; font-weight: 600; color: var(--ink-faint); }
+.dash-desc { font-size: 12.5px; color: var(--ink-faint); margin: 4px 0 12px; }
+.dash-empty { font-size: 13px; color: var(--ink-faint); padding: 12px 0; }
+.daily-list { display: flex; flex-direction: column; gap: 6px; }
+.daily-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.daily-item.done { background: var(--ok-soft); border-color: var(--ok-line); }
+.daily-item.done .daily-name { text-decoration: line-through; color: var(--ink-faint); }
+.daily-check { border: none; background: transparent; font-size: 18px; line-height: 1; }
+.daily-info { display: flex; flex-direction: column; }
+.daily-name { font-size: 14px; font-weight: 700; }
+.daily-name a { color: inherit; text-decoration: none; }
+.daily-desc { font-size: 12px; color: var(--ink-faint); }
+.hot-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.hot-tag { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700; color: var(--ink-soft); }
+.hot-tag b { color: var(--accent); margin-left: 3px; }
+.hot-tag:hover { border-color: var(--accent); color: var(--accent); }
+.top-posts { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.top-post { display: flex; align-items: center; gap: 10px; font-size: 13.5px; padding: 4px 0; }
+.top-rank { width: 22px; height: 22px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.top-title { flex: 1; font-weight: 600; }
+.top-count { font-size: 12.5px; color: var(--heart); font-weight: 700; white-space: nowrap; }
+.ip-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.ip-card { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: var(--bg); }
+.ip-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.ip-name { font-size: 15px; font-weight: 800; color: var(--brag); }
+.ip-stat { font-size: 11.5px; color: var(--ink-faint); font-weight: 600; }
+.ip-post { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; padding: 3px 0; }
+.ip-post-meta { font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+.country-board { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.country-col { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: var(--bg); }
+.country-head { font-size: 15px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: baseline; gap: 6px; }
+.country-post { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; padding: 3px 0; }
+
+.empty { text-align: center; padding: 70px 20px; color: var(--ink-faint); }
+.empty-emoji { font-size: 44px; margin-bottom: 12px; }
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 11px 20px; border-radius: 999px; font-size: 14px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.25); z-index: 100; }
+
+@media (max-width: 860px) { .dash-grid { grid-template-columns: 1fr; } }
+@media (max-width: 720px) {
+  .topbar-inner { gap: 10px; }
+  .tabs { order: 3; width: 100%; overflow-x: auto; }
+  #search-input { width: 100%; }
+  .field-row { grid-template-columns: 1fr; gap: 0; }
+}
+</style>
+</head>
+<body>
+<div class="demo-banner">🧪 데모 미리보기 — 데이터는 이 브라우저에만 저장됩니다 (실서비스는 팀 공유 DB)
+  <button id="btn-reset">데이터 초기화</button>
+</div>
+
+<div id="login-screen" class="login-screen hidden">
+  <div class="login-card">
+    <div class="login-logo">✨</div>
+    <h1>PB 트렌드 허브</h1>
+    <p class="login-sub">유행하는 상품을 모으고, 영감을 나누고, 소재를 찾는 우리 팀 공간</p>
+    <form id="login-form">
+      <input id="login-nickname" type="text" maxlength="20" placeholder="닉네임을 입력하세요" autocomplete="off" />
+      <button type="submit" class="btn btn-primary btn-block">입장하기</button>
+    </form>
+    <p class="login-hint">처음 입력하는 닉네임이면 자동으로 계정이 만들어져요.</p>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">✨ PB 트렌드 허브</div>
+      <nav class="tabs">
+        <button class="tab active" data-tab="dashboard">대시보드</button>
+        <button class="tab" data-tab="feed">트렌드 피드</button>
+        <button class="tab" data-tab="brag">자랑 게시판</button>
+        <button class="tab" data-tab="sites">사이트 디렉토리</button>
+        <button class="tab" data-tab="mine">내 활동</button>
+      </nav>
+      <div class="topbar-right">
+        <button id="btn-new-post" class="btn btn-primary">+ 공유하기</button>
+        <span id="me-nickname" class="me-nickname"></span>
+        <button id="btn-logout" class="btn btn-ghost">로그아웃</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="view-dashboard" class="view">
+      <div id="kpi-row" class="kpi-row"></div>
+      <div class="dash-grid">
+        <div class="dash-card">
+          <h2 class="dash-title">✅ 오늘의 데일리 체크 <span id="daily-progress" class="dash-sub"></span></h2>
+          <p class="dash-desc">매일 놓치지 않고 봐야 하는 사이트예요. 확인했으면 체크!</p>
+          <div id="daily-list" class="daily-list"></div>
+        </div>
+        <div class="dash-card">
+          <h2 class="dash-title">🔥 지금 뜨는 태그 <span class="dash-sub">최근 2주</span></h2>
+          <div id="hot-tags" class="hot-tags"></div>
+          <h2 class="dash-title" style="margin-top:20px">🚀 관심 급상승</h2>
+          <div id="top-posts" class="top-posts"></div>
+        </div>
+      </div>
+      <div class="dash-card">
+        <h2 class="dash-title">🎨 IP별 인기 상품</h2>
+        <p class="dash-desc">캐릭터/브랜드 IP가 입력된 포스트를 관심 수 기준으로 모아 봅니다.</p>
+        <div id="ip-board" class="ip-board"></div>
+      </div>
+      <div class="dash-card">
+        <h2 class="dash-title">🌏 국가별 트렌드</h2>
+        <div id="country-board" class="country-board"></div>
+      </div>
+    </section>
+
+    <section id="view-feed" class="view hidden">
+      <div class="feed-controls">
+        <div class="filter-row"><div id="category-chips" class="chips"></div></div>
+        <div class="filter-row filter-row-right">
+          <select id="country-filter"></select>
+          <input id="search-input" type="search" placeholder="상품, 태그, IP, 사이트 검색…" />
+          <select id="sort-select">
+            <option value="latest">최신순</option>
+            <option value="popular">관심 많은 순</option>
+          </select>
+        </div>
+      </div>
+      <div id="post-grid" class="post-grid"></div>
+      <div id="feed-empty" class="empty hidden">
+        <div class="empty-emoji">🔍</div>
+        <p>아직 공유된 상품이 없어요.<br />첫 번째 트렌드를 공유해 보세요!</p>
+      </div>
+    </section>
+
+    <section id="view-sites" class="view hidden">
+      <div class="sites-header">
+        <div class="scope-toggle">
+          <button class="scope-btn active" data-scope="all">팀 전체 사이트</button>
+          <button class="scope-btn" data-scope="mine">내가 등록한 사이트</button>
+        </div>
+        <button id="btn-new-site" class="btn btn-primary">+ 사이트 등록</button>
+      </div>
+      <div id="site-grid" class="site-grid"></div>
+      <div id="sites-empty" class="empty hidden">
+        <div class="empty-emoji">🌐</div>
+        <p>등록된 사이트가 없어요.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="post-modal" class="modal-backdrop hidden">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>트렌드 공유하기</h2>
+      <button class="modal-close" data-close="post-modal">&times;</button>
+    </div>
+    <form id="post-form">
+      <div class="type-toggle">
+        <label><input type="radio" name="post_type" value="trend" checked /> <span>🔥 트렌드 발견</span></label>
+        <label><input type="radio" name="post_type" value="brag" /> <span>🏆 소재 발굴 자랑</span></label>
+      </div>
+      <label class="field">상품/소재 이름 *
+        <input name="title" required maxlength="100" placeholder="예) 젤리 그립톡 스마트톡" />
+      </label>
+      <div class="field-row">
+        <label class="field">카테고리 <select name="category"></select></label>
+        <label class="field">가격 <input name="price" maxlength="30" placeholder="예) 12,000원" /></label>
+      </div>
+      <div class="field-row">
+        <label class="field">국가/지역 <select name="country"></select></label>
+        <label class="field">IP (캐릭터/브랜드) <input name="ip_name" maxlength="50" placeholder="예) 산리오, 치이카와 (선택)" /></label>
+      </div>
+      <div class="field-row">
+        <label class="field">발견한 사이트 <input name="source_site" maxlength="50" placeholder="예) 와디즈" /></label>
+        <label class="field">상품 링크 <input name="url" type="url" placeholder="https://…" /></label>
+      </div>
+      <label class="field">태그 (쉼표로 구분)
+        <input name="tags" maxlength="200" placeholder="예) 그립톡, 젤리, 투명" />
+      </label>
+      <label class="field">메모 / 인사이트
+        <textarea name="memo" rows="3" maxlength="1000" placeholder="왜 뜨고 있는지, PB로 어떻게 풀 수 있을지 적어 주세요."></textarea>
+      </label>
+      <button type="submit" class="btn btn-primary btn-block">공유하기</button>
+    </form>
+  </div>
+</div>
+
+<div id="site-modal" class="modal-backdrop hidden">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>사이트 등록</h2>
+      <button class="modal-close" data-close="site-modal">&times;</button>
+    </div>
+    <form id="site-form">
+      <label class="field">사이트 이름 * <input name="name" required maxlength="50" placeholder="예) 와디즈" /></label>
+      <label class="field">주소(URL) * <input name="url" required maxlength="300" placeholder="예) www.wadiz.kr" /></label>
+      <div class="field-row">
+        <label class="field">카테고리 <select name="category"></select></label>
+        <label class="field">국가/지역 <select name="country"></select></label>
+      </div>
+      <label class="field">이 사이트를 보는 이유
+        <textarea name="description" rows="2" maxlength="300" placeholder="예) 펀딩 랭킹으로 뜨는 아이템 미리 보기"></textarea>
+      </label>
+      <label class="check-field">
+        <input type="checkbox" name="daily_check" value="1" />
+        <span>📌 매일 봐야 하는 사이트 (대시보드 데일리 체크에 표시)</span>
+      </label>
+      <button type="submit" class="btn btn-primary btn-block">등록하기</button>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+/* ===== 데모 백엔드: localStorage 기반 (실서비스는 Express + SQLite) ===== */
+const KEY = 'pb-trend-hub-demo-v1';
+let DB;
+
+function nowStr(offsetDays = 0) {
+  const d = new Date(Date.now() - offsetDays * 86400000);
+  return d.toISOString().slice(0, 19).replace('T', ' ');
+}
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+function seedDB() {
+  const users = [
+    { id: 1, nickname: '트렌드봇' }, { id: 2, nickname: '수민' }, { id: 3, nickname: '지훈' },
+  ];
+  const posts = [
+    { id: 1, user_id: 1, post_type: 'trend', title: '젤리 그립톡 스마트톡', url: 'https://www.29cm.co.kr', image_url: '', price: '8,900원', source_site: '29CM', category: '디지털/테크', country: '한국', ip_name: '', tags: '그립톡,젤리,투명', memo: 'SNS에서 투명 젤리 소재 그립톡이 계속 올라옴. 컬러 베리에이션으로 PB 전개 가능해 보여요.', created_at: nowStr(1) },
+    { id: 2, user_id: 1, post_type: 'trend', title: '납작 복숭아 모양 인센스 홀더', url: 'https://ohou.se', image_url: '', price: '15,000원', source_site: '오늘의집', category: '리빙/홈데코', country: '한국', ip_name: '', tags: '인센스,홈프레그런스,오브제', memo: '홈프레그런스 카테고리가 꾸준히 성장 중. 과일 모티브 오브제형 홀더가 인기.', created_at: nowStr(2) },
+    { id: 3, user_id: 2, post_type: 'trend', title: '치이카와 미니 파우치 가챠', url: 'https://www.makuake.com', image_url: '', price: '¥550', source_site: '마쿠아케', category: '패션잡화', country: '일본', ip_name: '치이카와', tags: '치이카와,가챠,파우치', memo: '일본 가챠샵에서 품절 행진. 국내 수요도 SNS에서 확인됨.', created_at: nowStr(0) },
+    { id: 4, user_id: 3, post_type: 'trend', title: '산리오 마이멜로디 데스크 클리너', url: 'https://www.rakuten.co.jp', image_url: '', price: '¥1,320', source_site: '라쿠텐', category: '문구/팬시', country: '일본', ip_name: '산리오', tags: '산리오,마이멜로디,데스크테리어', memo: '라쿠텐 문구 랭킹 상위권. 캐릭터 데스크테리어 수요 꾸준함.', created_at: nowStr(1) },
+    { id: 5, user_id: 2, post_type: 'trend', title: '모루 인형 키링 DIY 키트', url: 'https://www.idus.com', image_url: '', price: '12,000원', source_site: '아이디어스', category: '문구/팬시', country: '한국', ip_name: '', tags: '모루인형,키링,DIY', memo: '모루 인형 열풍이 키트 상품으로 확장되는 중. 초보자용 키트 구성 참고.', created_at: nowStr(3) },
+    { id: 6, user_id: 3, post_type: 'brag', title: '빈티지 체크 패턴 데스크 매트 소재 발굴!', url: 'https://www.wadiz.kr', image_url: '', price: '', source_site: '와디즈', category: '문구/팬시', country: '한국', ip_name: '', tags: '데스크테리어,체크,빈티지', memo: '펀딩 오픈 3일 만에 1,000% 달성한 데스크 매트. 이 체크 패턴 원단 공급처 찾았습니다 👍', created_at: nowStr(0) },
+  ];
+  const sites = [
+    { id: 1, user_id: 1, name: '와디즈', url: 'https://www.wadiz.kr', description: '펀딩 랭킹으로 뜨는 아이템 미리 보기', category: '펀딩/트렌드', country: '한국', daily_check: 1 },
+    { id: 2, user_id: 1, name: '마쿠아케', url: 'https://www.makuake.com', description: '일본 펀딩 랭킹 - 신상 트렌드 선행지표', category: '펀딩/트렌드', country: '일본', daily_check: 1 },
+    { id: 3, user_id: 1, name: '라쿠텐 랭킹', url: 'https://ranking.rakuten.co.jp', description: '일본 커머스 실시간 랭킹', category: '펀딩/트렌드', country: '일본', daily_check: 1 },
+    { id: 4, user_id: 1, name: '오늘의집', url: 'https://ohou.se', description: '리빙 카테고리 인기 상품, 유저 취향 파악', category: '리빙/홈데코', country: '한국', daily_check: 1 },
+    { id: 5, user_id: 1, name: '핀터레스트', url: 'https://www.pinterest.com', description: '무드보드, 디자인 레퍼런스 수집', category: '영감/레퍼런스', country: '글로벌', daily_check: 0 },
+    { id: 6, user_id: 1, name: '아이디어스', url: 'https://www.idus.com', description: '핸드메이드 트렌드, 실시간 인기 작품', category: '핸드메이드', country: '한국', daily_check: 0 },
+    { id: 7, user_id: 1, name: '29CM', url: 'https://www.29cm.co.kr', description: '기획전/브랜드 큐레이션 레퍼런스', category: '영감/레퍼런스', country: '한국', daily_check: 0 },
+  ];
+  const interests = [
+    { post_id: 3, user_id: 1 }, { post_id: 3, user_id: 3 },
+    { post_id: 4, user_id: 2 }, { post_id: 1, user_id: 3 }, { post_id: 6, user_id: 2 },
+  ];
+  const comments = [
+    { id: 1, post_id: 3, user_id: 3, body: '이거 국내에서도 슬슬 보이기 시작해요. 빠르게 가시죠!', created_at: nowStr(0) },
+  ];
+  return { users, posts, sites, interests, comments, checks: [], sessionUserId: null, nextId: { post: 7, site: 8, comment: 2, user: 4 } };
+}
+
+function loadDB() {
+  try { DB = JSON.parse(localStorage.getItem(KEY)) || seedDB(); }
+  catch { DB = seedDB(); }
+  save();
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch {} }
+
+const byId = (arr, id) => arr.find((x) => x.id === Number(id));
+const userName = (id) => (byId(DB.users, id) || {}).nickname || '?';
+
+function postWithMeta(p) {
+  const ints = DB.interests.filter((i) => i.post_id === p.id);
+  const me = DB.sessionUserId;
+  return {
+    ...p,
+    author: userName(p.user_id),
+    tags: p.tags ? p.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+    interest_count: ints.length,
+    interested_users: ints.map((i) => userName(i.user_id)),
+    my_interest: me ? ints.some((i) => i.user_id === me) : false,
+    comment_count: DB.comments.filter((c) => c.post_id === p.id).length,
+  };
+}
+
+/* 실서비스의 REST API를 흉내 내는 데모 라우터 */
+async function api(path, opts = {}) {
+  const method = (opts.method || 'GET').toUpperCase();
+  const body = opts.body || {};
+  const [p, qs] = path.split('?');
+  const q = new URLSearchParams(qs || '');
+  const seg = p.split('/').filter(Boolean).slice(1); // 'api' 제거
+  const me = DB.sessionUserId ? byId(DB.users, DB.sessionUserId) : null;
+  const need = () => { if (!me) throw new Error('로그인이 필요합니다.'); };
+
+  if (seg[0] === 'login') {
+    const nickname = String(body.nickname || '').trim();
+    if (!nickname || nickname.length > 20) throw new Error('닉네임은 1~20자로 입력해 주세요.');
+    let u = DB.users.find((x) => x.nickname === nickname);
+    if (!u) { u = { id: DB.nextId.user++, nickname }; DB.users.push(u); }
+    DB.sessionUserId = u.id; save();
+    return { user: u };
+  }
+  if (seg[0] === 'logout') { DB.sessionUserId = null; save(); return { ok: true }; }
+  if (seg[0] === 'me') return { user: me || null };
+
+  if (seg[0] === 'posts') {
+    if (seg.length === 1 && method === 'GET') {
+      let rows = [...DB.posts];
+      const cat = q.get('category'), country = q.get('country'), type = q.get('type'), ip = q.get('ip'), qq = (q.get('q') || '').toLowerCase();
+      if (cat && cat !== '전체') rows = rows.filter((r) => r.category === cat);
+      if (country && country !== '전체') rows = rows.filter((r) => r.country === country);
+      if (type) rows = rows.filter((r) => r.post_type === type);
+      if (ip) rows = rows.filter((r) => r.ip_name === ip);
+      if (q.get('author') === 'me' && me) rows = rows.filter((r) => r.user_id === me.id);
+      if (qq) rows = rows.filter((r) => [r.title, r.tags, r.memo, r.source_site, r.ip_name].join(' ').toLowerCase().includes(qq));
+      rows = rows.map(postWithMeta);
+      rows.sort(q.get('sort') === 'popular'
+        ? (a, b) => b.interest_count - a.interest_count || b.created_at.localeCompare(a.created_at)
+        : (a, b) => b.created_at.localeCompare(a.created_at));
+      return { posts: rows };
+    }
+    if (seg.length === 1 && method === 'POST') {
+      need();
+      if (!String(body.title || '').trim()) throw new Error('상품/소재 이름을 입력해 주세요.');
+      const post = {
+        id: DB.nextId.post++, user_id: me.id,
+        post_type: body.post_type === 'brag' ? 'brag' : 'trend',
+        title: String(body.title).trim(), url: String(body.url || ''), image_url: String(body.image_url || ''),
+        price: String(body.price || ''), source_site: String(body.source_site || ''),
+        category: String(body.category || '기타'), country: String(body.country || '한국'),
+        ip_name: String(body.ip_name || '').trim(), tags: String(body.tags || ''), memo: String(body.memo || ''),
+        created_at: nowStr(),
+      };
+      DB.posts.push(post); save();
+      return { post: postWithMeta(post) };
+    }
+    const post = byId(DB.posts, seg[1]);
+    if (!post) throw new Error('포스트를 찾을 수 없습니다.');
+    if (seg[2] === 'interest') {
+      need();
+      const idx = DB.interests.findIndex((i) => i.post_id === post.id && i.user_id === me.id);
+      if (idx >= 0) DB.interests.splice(idx, 1);
+      else DB.interests.push({ post_id: post.id, user_id: me.id });
+      save();
+      return { post: postWithMeta(post) };
+    }
+    if (seg[2] === 'comments') {
+      if (method === 'POST') {
+        need();
+        const text = String(body.body || '').trim();
+        if (!text) throw new Error('댓글 내용을 입력해 주세요.');
+        DB.comments.push({ id: DB.nextId.comment++, post_id: post.id, user_id: me.id, body: text, created_at: nowStr() });
+        save();
+      }
+      return { comments: DB.comments.filter((c) => c.post_id === post.id).map((c) => ({ ...c, author: userName(c.user_id) })) };
+    }
+    if (method === 'DELETE') {
+      need();
+      if (post.user_id !== me.id) throw new Error('본인 포스트만 삭제할 수 있습니다.');
+      DB.posts = DB.posts.filter((x) => x.id !== post.id);
+      DB.interests = DB.interests.filter((i) => i.post_id !== post.id);
+      DB.comments = DB.comments.filter((c) => c.post_id !== post.id);
+      save();
+      return { ok: true };
+    }
+  }
+
+  if (seg[0] === 'sites') {
+    if (seg.length === 1 && method === 'GET') {
+      let rows = [...DB.sites];
+      if (q.get('scope') === 'mine') rows = me ? rows.filter((s) => s.user_id === me.id) : [];
+      return { sites: rows.map((s) => ({ ...s, owner: userName(s.user_id), mine: me ? s.user_id === me.id : false })).reverse() };
+    }
+    if (seg.length === 1 && method === 'POST') {
+      need();
+      if (!String(body.name || '').trim()) throw new Error('사이트 이름을 입력해 주세요.');
+      let url = String(body.url || '').trim();
+      if (!url) throw new Error('사이트 주소(URL)를 입력해 주세요.');
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      const site = {
+        id: DB.nextId.site++, user_id: me.id, name: String(body.name).trim(), url,
+        description: String(body.description || ''), category: String(body.category || '기타'),
+        country: String(body.country || '한국'), daily_check: body.daily_check ? 1 : 0,
+      };
+      DB.sites.push(site); save();
+      return { site: { ...site, owner: me.nickname, mine: true } };
+    }
+    const site = byId(DB.sites, seg[1]);
+    if (!site) throw new Error('사이트를 찾을 수 없습니다.');
+    if (seg[2] === 'check') {
+      need();
+      const t = todayStr();
+      const idx = DB.checks.findIndex((c) => c.site_id === site.id && c.user_id === me.id && c.check_date === t);
+      if (idx >= 0) DB.checks.splice(idx, 1);
+      else DB.checks.push({ site_id: site.id, user_id: me.id, check_date: t });
+      save();
+      return { checked: idx < 0 };
+    }
+    if (method === 'DELETE') {
+      need();
+      if (site.user_id !== me.id) throw new Error('본인이 등록한 사이트만 삭제할 수 있습니다.');
+      DB.sites = DB.sites.filter((x) => x.id !== site.id);
+      save();
+      return { ok: true };
+    }
+  }
+
+  if (seg[0] === 'dashboard') {
+    const t = todayStr();
+    const weekAgo = nowStr(7);
+    const kpis = {
+      posts_week: DB.posts.filter((p2) => p2.created_at >= weekAgo).length,
+      interests_total: DB.interests.length,
+      members: DB.users.length,
+      sites: DB.sites.length,
+    };
+    const dailySites = DB.sites.filter((s) => s.daily_check).map((s) => ({
+      ...s,
+      checked: me ? DB.checks.some((c) => c.site_id === s.id && c.user_id === me.id && c.check_date === t) : false,
+    })).sort((a, b) => a.checked - b.checked || a.country.localeCompare(b.country));
+    const twoWeeks = nowStr(14);
+    const tagCount = {};
+    for (const p2 of DB.posts.filter((x) => x.created_at >= twoWeeks && x.tags)) {
+      for (const tg of p2.tags.split(',').map((x) => x.trim()).filter(Boolean)) tagCount[tg] = (tagCount[tg] || 0) + 1;
+    }
+    const hotTags = Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([tag, count]) => ({ tag, count }));
+    const withMeta = DB.posts.map(postWithMeta);
+    const topPosts = [...withMeta].sort((a, b) => b.interest_count - a.interest_count || b.created_at.localeCompare(a.created_at)).slice(0, 5);
+    const ipMap = {};
+    for (const p2 of withMeta.filter((x) => x.ip_name)) {
+      (ipMap[p2.ip_name] = ipMap[p2.ip_name] || []).push(p2);
+    }
+    const byIp = Object.entries(ipMap).map(([ip_name, arr]) => ({
+      ip_name, post_count: arr.length,
+      interest_sum: arr.reduce((s, x) => s + x.interest_count, 0),
+      top_posts: [...arr].sort((a, b) => b.interest_count - a.interest_count).slice(0, 3),
+    })).sort((a, b) => b.interest_sum - a.interest_sum).slice(0, 8);
+    const cMap = {};
+    for (const p2 of withMeta) (cMap[p2.country] = cMap[p2.country] || []).push(p2);
+    const byCountry = Object.entries(cMap).map(([country, arr]) => ({
+      country, post_count: arr.length,
+      recent_posts: [...arr].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5),
+    })).sort((a, b) => b.post_count - a.post_count);
+    return { kpis, dailySites, hotTags, topPosts, byIp, byCountry };
+  }
+
+  throw new Error('알 수 없는 요청입니다: ' + path);
+}
+
+/* ===== 프론트엔드 (실서비스 app.js와 동일 구조) ===== */
+const POST_CATEGORIES = ['문구/팬시', '리빙/홈데코', '패션잡화', '뷰티', '푸드', '디지털/테크', '키즈', '반려동물', '기타'];
+const SITE_CATEGORIES = ['펀딩/트렌드', '문구/팬시', '리빙/홈데코', '패션잡화', '뷰티', '푸드', '영감/레퍼런스', '핸드메이드', '해외', '기타'];
+const COUNTRIES = ['한국', '일본', '미국', '중국', '동남아', '유럽', '글로벌'];
+const COUNTRY_FLAG = { '한국': '🇰🇷', '일본': '🇯🇵', '미국': '🇺🇸', '중국': '🇨🇳', '동남아': '🌴', '유럽': '🇪🇺', '글로벌': '🌏' };
+const CATEGORY_EMOJI = { '문구/팬시': '✏️', '리빙/홈데코': '🏠', '패션잡화': '👜', '뷰티': '💄', '푸드': '🍑', '디지털/테크': '📱', '키즈': '🧸', '반려동물': '🐶', '기타': '✨' };
+const flag = (c) => COUNTRY_FLAG[c] || '🌏';
+
+const state = { user: null, tab: 'dashboard', category: '전체', country: '전체', sort: 'latest', q: '', siteScope: 'all', openComments: new Set() };
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function timeAgo(iso) {
+  const then = new Date(iso.replace(' ', 'T') + 'Z');
+  const diff = (Date.now() - then.getTime()) / 1000;
+  if (diff < 60) return '방금 전';
+  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+  if (diff < 86400 * 30) return `${Math.floor(diff / 86400)}일 전`;
+  return then.toLocaleDateString('ko-KR');
+}
+function toast(msg) {
+  const el = $('#toast');
+  el.textContent = msg; el.classList.remove('hidden');
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.add('hidden'), 2200);
+}
+function safeHttpUrl(u) {
+  try { const p = new URL(u); return p.protocol === 'http:' || p.protocol === 'https:' ? p.href : null; }
+  catch { return null; }
+}
+
+async function checkLogin() {
+  const { user } = await api('/api/me');
+  state.user = user;
+  if (user) {
+    $('#login-screen').classList.add('hidden');
+    $('#app').classList.remove('hidden');
+    $('#me-nickname').textContent = `${user.nickname} 님`;
+    render();
+  } else {
+    $('#app').classList.add('hidden');
+    $('#login-screen').classList.remove('hidden');
+  }
+}
+
+$('#login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nickname = $('#login-nickname').value.trim();
+  if (!nickname) return;
+  try { await api('/api/login', { method: 'POST', body: { nickname } }); await checkLogin(); toast(`환영합니다, ${nickname} 님! 👋`); }
+  catch (err) { toast(err.message); }
+});
+$('#btn-logout').addEventListener('click', async () => { await api('/api/logout', { method: 'POST' }); state.user = null; checkLogin(); });
+$('#btn-reset').addEventListener('click', () => { localStorage.removeItem(KEY); loadDB(); checkLogin(); toast('데모 데이터를 초기화했습니다.'); });
+
+$$('.tab').forEach((btn) => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+function switchTab(tab) {
+  state.tab = tab;
+  $$('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
+  render();
+}
+function render() {
+  const isSites = state.tab === 'sites';
+  const isDash = state.tab === 'dashboard';
+  $('#view-dashboard').classList.toggle('hidden', !isDash);
+  $('#view-feed').classList.toggle('hidden', isDash || isSites);
+  $('#view-sites').classList.toggle('hidden', !isSites);
+  if (isDash) loadDashboard(); else if (isSites) loadSites(); else loadPosts();
+}
+
+async function loadDashboard() {
+  const { kpis, dailySites, hotTags, topPosts, byIp, byCountry } = await api('/api/dashboard');
+  $('#kpi-row').innerHTML = [
+    { label: '이번 주 새 트렌드', value: kpis.posts_week, emoji: '🆕' },
+    { label: '누적 관심있어요', value: kpis.interests_total, emoji: '❤️' },
+    { label: '참여 팀원', value: kpis.members, emoji: '👥' },
+    { label: '등록된 사이트', value: kpis.sites, emoji: '🌐' },
+  ].map((k) => `<div class="kpi"><div class="kpi-emoji">${k.emoji}</div><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div></div>`).join('');
+
+  const done = dailySites.filter((s) => s.checked).length;
+  $('#daily-progress').textContent = dailySites.length ? `${done}/${dailySites.length} 완료` : '';
+  $('#daily-list').innerHTML = dailySites.length ? dailySites.map((s) => {
+    const link = safeHttpUrl(s.url);
+    return `<div class="daily-item ${s.checked ? 'done' : ''}" data-id="${s.id}">
+      <button class="daily-check" data-act="daily-toggle">${s.checked ? '✅' : '⬜'}</button>
+      <div class="daily-info">
+        <span class="daily-name">${flag(s.country)} ${link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(s.name)} ↗</a>` : esc(s.name)}</span>
+        ${s.description ? `<span class="daily-desc">${esc(s.description)}</span>` : ''}
+      </div></div>`;
+  }).join('') : '<p class="dash-empty">사이트 등록 시 "매일 봐야 하는 사이트"로 체크하면 여기에 표시돼요.</p>';
+  $$('#daily-list [data-act="daily-toggle"]').forEach((btn) => btn.addEventListener('click', async () => {
+    await api(`/api/sites/${btn.closest('.daily-item').dataset.id}/check`, { method: 'POST' });
+    loadDashboard();
+  }));
+
+  $('#hot-tags').innerHTML = hotTags.length
+    ? hotTags.map((t) => `<button class="hot-tag" data-tag="${esc(t.tag)}">#${esc(t.tag)} <b>${t.count}</b></button>`).join('')
+    : '<p class="dash-empty">최근 2주간 태그가 없어요.</p>';
+  $$('#hot-tags .hot-tag').forEach((btn) => btn.addEventListener('click', () => {
+    state.q = btn.dataset.tag; switchTab('feed'); $('#search-input').value = state.q;
+  }));
+
+  $('#top-posts').innerHTML = topPosts.filter((p) => p.interest_count > 0).map((p, i) => `
+    <div class="top-post"><span class="top-rank">${i + 1}</span>
+      <span class="top-title">${flag(p.country)} ${esc(p.title)}${p.ip_name ? ` <span class="tag">${esc(p.ip_name)}</span>` : ''}</span>
+      <span class="top-count">❤️ ${p.interest_count}</span></div>`).join('') || '<p class="dash-empty">아직 관심 표시가 없어요.</p>';
+
+  $('#ip-board').innerHTML = byIp.length ? byIp.map((ip) => `
+    <div class="ip-card">
+      <div class="ip-head"><span class="ip-name">${esc(ip.ip_name)}</span><span class="ip-stat">포스트 ${ip.post_count} · ❤️ ${ip.interest_sum}</span></div>
+      ${ip.top_posts.map((p) => `<div class="ip-post"><span>${flag(p.country)} ${esc(p.title)}</span><span class="ip-post-meta">${p.price ? esc(p.price) + ' · ' : ''}❤️ ${p.interest_count}</span></div>`).join('')}
+    </div>`).join('')
+    : '<p class="dash-empty">아직 IP가 입력된 포스트가 없어요.</p>';
+
+  $('#country-board').innerHTML = byCountry.map((c) => `
+    <div class="country-col">
+      <div class="country-head">${flag(c.country)} ${esc(c.country)} <span class="dash-sub">${c.post_count}건</span></div>
+      ${c.recent_posts.map((p) => `<div class="country-post"><span>${esc(p.title)}${p.ip_name ? ` <span class="tag">${esc(p.ip_name)}</span>` : ''}</span><span class="ip-post-meta">❤️ ${p.interest_count}</span></div>`).join('')}
+    </div>`).join('');
+}
+
+function renderChips() {
+  $('#category-chips').innerHTML = ['전체', ...POST_CATEGORIES].map((c) =>
+    `<button class="chip ${state.category === c ? 'active' : ''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
+  $$('#category-chips .chip').forEach((btn) => btn.addEventListener('click', () => {
+    state.category = btn.dataset.cat; renderChips(); loadPosts();
+  }));
+}
+
+async function loadPosts() {
+  const params = new URLSearchParams();
+  params.set('sort', state.sort);
+  if (state.category !== '전체') params.set('category', state.category);
+  if (state.country !== '전체') params.set('country', state.country);
+  if (state.q) params.set('q', state.q);
+  if (state.tab === 'brag') params.set('type', 'brag');
+  if (state.tab === 'mine') params.set('author', 'me');
+  const { posts } = await api('/api/posts?' + params.toString());
+  $('#post-grid').innerHTML = posts.map(postCard).join('');
+  $('#feed-empty').classList.toggle('hidden', posts.length > 0);
+  posts.forEach((p) => { if (state.openComments.has(p.id)) toggleComments(p.id, true); });
+  bindPostEvents();
+}
+
+function postCard(p) {
+  const emoji = CATEGORY_EMOJI[p.category] || '✨';
+  const imgUrl = p.image_url ? safeHttpUrl(p.image_url) : null;
+  const thumb = imgUrl
+    ? `<div class="post-thumb" style="background-image:url('${esc(imgUrl)}')"></div>`
+    : `<div class="post-thumb placeholder">${emoji}</div>`;
+  const link = p.url ? safeHttpUrl(p.url) : null;
+  const titleHtml = link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(p.title)} ↗</a>` : esc(p.title);
+  const names = p.interested_users.length
+    ? `${p.interested_users.slice(0, 3).map(esc).join(', ')}${p.interested_users.length > 3 ? ` 외 ${p.interested_users.length - 3}명` : ''} 님이 관심` : '';
+  const mine = state.user && p.user_id === state.user.id;
+  return `
+  <article class="post-card ${p.post_type}" data-id="${p.id}">
+    <div style="position:relative">${thumb}<span class="badge-type">${p.post_type === 'brag' ? '🏆 자랑' : '🔥 트렌드'}</span></div>
+    <div class="post-body">
+      <div class="post-meta-top"><span class="post-cat">${flag(p.country)} ${esc(p.category)}</span><span>${esc(p.author)} · ${timeAgo(p.created_at)}</span></div>
+      <h3 class="post-title">${titleHtml}</h3>
+      ${p.ip_name ? `<div><span class="tag">🎨 ${esc(p.ip_name)}</span></div>` : ''}
+      ${p.price ? `<div class="post-price">${esc(p.price)}</div>` : ''}
+      ${p.memo ? `<p class="post-memo">${esc(p.memo)}</p>` : ''}
+      ${p.tags.length ? `<div class="post-tags">${p.tags.map((t) => `<span class="tag">#${esc(t)}</span>`).join('')}</div>` : ''}
+      ${p.source_site ? `<div class="post-source">발견한 곳: <b>${esc(p.source_site)}</b></div>` : ''}
+    </div>
+    <div class="post-foot">
+      <button class="btn-interest ${p.my_interest ? 'on' : ''}" data-act="interest" title="${esc(p.interested_users.join(', '))}">${p.my_interest ? '❤️' : '🤍'} 관심있어요 <b>${p.interest_count}</b></button>
+      <span class="interest-names">${names}</span>
+      <button class="btn-comments" data-act="comments">💬 ${p.comment_count}</button>
+      ${mine ? '<button class="btn-delete" data-act="delete">삭제</button>' : ''}
+    </div>
+    <div class="comments-box hidden" data-comments></div>
+  </article>`;
+}
+
+function bindPostEvents() {
+  $$('.post-card [data-act]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const card = btn.closest('.post-card');
+      const id = Number(card.dataset.id);
+      try {
+        if (btn.dataset.act === 'interest') {
+          const { post } = await api(`/api/posts/${id}/interest`, { method: 'POST' });
+          card.outerHTML = postCard(post);
+          if (state.openComments.has(id)) toggleComments(id, true);
+          bindPostEvents();
+        } else if (btn.dataset.act === 'comments') {
+          if (state.openComments.has(id)) { state.openComments.delete(id); card.querySelector('[data-comments]').classList.add('hidden'); }
+          else { state.openComments.add(id); await toggleComments(id, true); }
+        } else if (btn.dataset.act === 'delete') {
+          await api(`/api/posts/${id}`, { method: 'DELETE' });
+          toast('삭제했습니다.'); loadPosts();
+        }
+      } catch (err) { toast(err.message); }
+    });
+  });
+}
+
+async function toggleComments(postId, open) {
+  const card = document.querySelector(`.post-card[data-id="${postId}"]`);
+  if (!card) return;
+  const box = card.querySelector('[data-comments]');
+  if (!open) { box.classList.add('hidden'); return; }
+  const { comments } = await api(`/api/posts/${postId}/comments`);
+  box.innerHTML = `
+    ${comments.map((c) => `<div class="comment"><b>${esc(c.author)}</b>${esc(c.body)}<span class="comment-time">${timeAgo(c.created_at)}</span></div>`).join('') || '<div class="comment" style="color:var(--ink-faint)">첫 댓글을 남겨 보세요!</div>'}
+    <form class="comment-form"><input type="text" maxlength="300" placeholder="댓글 달기…" /><button type="submit" class="btn btn-primary">등록</button></form>`;
+  box.classList.remove('hidden');
+  box.querySelector('.comment-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = box.querySelector('input');
+    if (!input.value.trim()) return;
+    try {
+      await api(`/api/posts/${postId}/comments`, { method: 'POST', body: { body: input.value.trim() } });
+      await toggleComments(postId, true);
+      card.querySelector('[data-act="comments"]').textContent = `💬 ${comments.length + 1}`;
+    } catch (err) { toast(err.message); }
+  });
+}
+
+$('#country-filter').addEventListener('change', (e) => { state.country = e.target.value; loadPosts(); });
+let searchTimer;
+$('#search-input').addEventListener('input', (e) => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { state.q = e.target.value.trim(); loadPosts(); }, 300);
+});
+$('#sort-select').addEventListener('change', (e) => { state.sort = e.target.value; loadPosts(); });
+
+$$('.scope-btn').forEach((btn) => btn.addEventListener('click', () => {
+  state.siteScope = btn.dataset.scope;
+  $$('.scope-btn').forEach((b) => b.classList.toggle('active', b === btn));
+  loadSites();
+}));
+
+async function loadSites() {
+  const { sites } = await api(`/api/sites?scope=${state.siteScope}`);
+  $('#site-grid').innerHTML = sites.map((s) => {
+    const link = safeHttpUrl(s.url);
+    return `<div class="site-card" data-id="${s.id}">
+      <div class="site-top">
+        <span class="site-name">${flag(s.country)} ${link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(s.name)} ↗</a>` : esc(s.name)}</span>
+        <span class="site-cat">${esc(s.category)}</span>
+      </div>
+      ${s.daily_check ? '<div class="site-daily">📌 매일 체크</div>' : ''}
+      <div class="site-url">${esc(s.url)}</div>
+      ${s.description ? `<div class="site-desc">${esc(s.description)}</div>` : ''}
+      <div class="site-foot"><span>등록: ${esc(s.owner)}</span>${s.mine ? '<button class="btn-delete" data-act="site-delete">삭제</button>' : ''}</div>
+    </div>`;
+  }).join('');
+  $('#sites-empty').classList.toggle('hidden', sites.length > 0);
+  $$('#site-grid [data-act="site-delete"]').forEach((btn) => btn.addEventListener('click', async () => {
+    try { await api(`/api/sites/${btn.closest('.site-card').dataset.id}`, { method: 'DELETE' }); toast('삭제했습니다.'); loadSites(); }
+    catch (err) { toast(err.message); }
+  }));
+}
+
+function fillCategorySelects() {
+  $('#post-form select[name="category"]').innerHTML = POST_CATEGORIES.map((c) => `<option>${esc(c)}</option>`).join('');
+  $('#site-form select[name="category"]').innerHTML = SITE_CATEGORIES.map((c) => `<option>${esc(c)}</option>`).join('');
+  const opts = COUNTRIES.map((c) => `<option value="${esc(c)}">${flag(c)} ${esc(c)}</option>`).join('');
+  $('#post-form select[name="country"]').innerHTML = opts;
+  $('#site-form select[name="country"]').innerHTML = opts;
+  $('#country-filter').innerHTML = `<option value="전체">🌐 국가 전체</option>` + COUNTRIES.map((c) => `<option value="${esc(c)}">${flag(c)} ${esc(c)}</option>`).join('');
+}
+
+$('#btn-new-post').addEventListener('click', () => $('#post-modal').classList.remove('hidden'));
+$('#btn-new-site').addEventListener('click', () => $('#site-modal').classList.remove('hidden'));
+$$('.modal-close').forEach((btn) => btn.addEventListener('click', () => $('#' + btn.dataset.close).classList.add('hidden')));
+$$('.modal-backdrop').forEach((bd) => bd.addEventListener('click', (e) => { if (e.target === bd) bd.classList.add('hidden'); }));
+
+$('#post-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const body = Object.fromEntries(new FormData(e.target).entries());
+  try {
+    await api('/api/posts', { method: 'POST', body });
+    $('#post-modal').classList.add('hidden'); e.target.reset();
+    toast('공유했습니다! 🎉');
+    switchTab(body.post_type === 'brag' ? 'brag' : 'feed');
+  } catch (err) { toast(err.message); }
+});
+$('#site-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const body = Object.fromEntries(fd.entries());
+  body.daily_check = fd.get('daily_check') ? 1 : 0;
+  try {
+    await api('/api/sites', { method: 'POST', body });
+    $('#site-modal').classList.add('hidden'); e.target.reset();
+    toast('사이트를 등록했습니다! 🌐');
+    state.siteScope = 'mine';
+    $$('.scope-btn').forEach((b) => b.classList.toggle('active', b.dataset.scope === 'mine'));
+    loadSites();
+  } catch (err) { toast(err.message); }
+});
+
+loadDB();
+renderChips();
+fillCategorySelects();
+checkLogin();
+</script>
+</body>
+</html>

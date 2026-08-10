@@ -31,6 +31,19 @@ npm start
 npm run dev
 ```
 
+### Docker로 실행 (팀 공유 서버 배포용)
+
+```bash
+cd biz-admin
+docker compose up -d --build
+```
+
+http://서버주소:3000 으로 접속합니다. SQLite 데이터는 `biz-admin-data` 볼륨에 보존되어 컨테이너를 재시작해도 유지됩니다.
+
+## 데모 미리보기
+
+`demo/index.html`은 서버 없이 브라우저에서 바로 열어볼 수 있는 체험용 데모입니다 (데이터는 브라우저 localStorage에만 저장). 실제 기능 확인은 위의 서버 실행 방식을 사용하세요.
+
 ## 기술 구성
 
 | 구분 | 스택 |
