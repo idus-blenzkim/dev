@@ -1,8 +1,21 @@
-# biz-admin — ✨ PB 트렌드 허브
+# biz-admin — ✨ PB 트렌드 허브 (프로토타입)
 
-사내 비즈니스 어드민(biz-admin) 서비스입니다. 첫 번째 모듈로 PB팀 트렌드 큐레이션(트렌드 허브)을 제공합니다. 유행하는 상품을 모아 보고, 영감을 받고, 소재를 발굴하는 우리 팀의 공간이에요.
+PB팀 트렌드 큐레이션(트렌드 허브) 프로토타입입니다. 유행하는 상품을 모아 보고, 영감을 받고, 소재를 발굴하는 우리 팀의 공간이에요.
 
-> 텐바이텐(텐텐) 등 기존 서비스 코드베이스와 **독립적인 스탠드얼론 서비스**입니다. 외부 DB나 다른 시스템에 대한 의존성이 없습니다.
+> **이 폴더는 실제 biz-admin이 아닙니다.** 실제 biz-admin은 Bitbucket [`backpackr/business-operation-admin`](https://bitbucket.org/backpackr/business-operation-admin/src/master/) 저장소의 Next.js 앱이며, 사내 서버 `/DATA/docker/biz-admin/`에 배포됩니다. 이 폴더는 그 안의 **트렌드 HUB** 메뉴에 넣기 전, 기능과 화면을 먼저 확인하기 위한 독립 실행형 프로토타입입니다.
+
+## 실제 biz-admin과의 관계
+
+| 구분 | 실제 biz-admin | 이 프로토타입 |
+|---|---|---|
+| 저장소 | Bitbucket `business-operation-admin` | GitHub `idus-blenzkim/dev`의 `biz-admin/` |
+| 스택 | Next.js 16 / React 19 / TypeScript / Tailwind CSS 4 | Express + SQLite + Vanilla JS |
+| 개발 서버 | https://biz-admin.develop.10x10aws.net | 로컬 http://localhost:3000 |
+| 배포 | 사내 서버에서 `pull → plan → up → status` | Docker Compose 또는 로컬 실행 |
+
+실제 biz-admin에는 이미 **트렌드 HUB** 메뉴가 있고, 정희정님이 만든 **트렌드 → 브랜드 모니터링 → 브랜드 트렌드**(`/brand-trend`)가 들어가 있습니다. 해당 화면의 현재 상태와 UI/UX 개선 방향은 [`docs/BRAND-TREND-UIUX-HANDOFF-2026-10-28.md`](docs/BRAND-TREND-UIUX-HANDOFF-2026-10-28.md)에 정리돼 있습니다.
+
+이 프로토타입의 기능을 실제 biz-admin으로 옮길 때는 같은 트렌드 HUB 아래 메뉴로 붙이고, 인수인계 문서 4~5절의 기준(범위 명확화, 미확인과 0건 구분, 텐텐 스타일 유지)을 따릅니다.
 
 ## 주요 기능
 
